@@ -1,4 +1,4 @@
-import { useContext, useCallback, useState, useEffect } from 'react'
+import { useContext, useCallback, useState } from 'react'
 import { AuthContext } from '../context/AuthContext'
 
 const DEMO_USERS = [
@@ -9,23 +9,22 @@ const DEMO_USERS = [
 ]
 
 export function useAuthProvider() {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  // Cargar sesión al montar el componente
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const storedSession = localStorage.getItem('sentinelpay_session')
-    if (storedSession) {
-      try {
-        const session = JSON.parse(storedSession)
-        setUser(session)
-      } catch (error) {
-        console.error('Error al cargar sesión:', error)
-        localStorage.removeItem('sentinelpay_session')
-      }
+
+    if (!storedSession) {
+      return null
     }
-    setLoading(false)
-  }, [])
+
+    try {
+      return JSON.parse(storedSession)
+    } catch (error) {
+      console.error('Error al cargar sesión:', error)
+      localStorage.removeItem('sentinelpay_session')
+      return null
+    }
+  })
+  const [loading] = useState(false)
 
   const createDemoJwt = useCallback((userObj) => {
     return btoa(

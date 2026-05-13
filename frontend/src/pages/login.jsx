@@ -1,17 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
+import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
+import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined'
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 
 const roleOptions = [
-  { label: 'ADMIN', email: 'admin@sentinelpay.com', role: 'ADMIN' },
-  { label: 'ANALISTA', email: 'analyst@sentinelpay.com', role: 'ANALISTA' },
-  { label: 'SUPERV.', email: 'supervisor@sentinelpay.com', role: 'SUPERVISOR' },
-  { label: 'VISOR', email: 'viewer@sentinelpay.com', role: 'VISOR' },
+  { label: 'ADMIN', email: 'admin@sentinelpay.com', role: 'ADMIN', icon: AdminPanelSettingsOutlinedIcon },
+  { label: 'ANALISTA', email: 'analyst@sentinelpay.com', role: 'ANALISTA', icon: InsightsOutlinedIcon },
+  { label: 'SUPERV.', email: 'supervisor@sentinelpay.com', role: 'SUPERVISOR', icon: BadgeOutlinedIcon },
+  { label: 'VISOR', email: 'viewer@sentinelpay.com', role: 'VISOR', icon: VerifiedOutlinedIcon },
 ]
 
 function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const timerRef = useRef(null)
 
   const [selectedRole, setSelectedRole] = useState(roleOptions[0])
   const [email, setEmail] = useState(roleOptions[0].email)
@@ -27,6 +35,12 @@ function Login() {
     setPassword('admin123')
   }
 
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(timerRef.current)
+    }
+  }, [])
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setIsLoading(true)
@@ -38,10 +52,9 @@ function Login() {
         type: 'success',
         text: `Acceso concedido como ${selectedRole.role}. Sesión demo iniciada correctamente.`,
       })
-      // Redirigir al dashboard después de 1 segundo
-      setTimeout(() => {
+      timerRef.current = window.setTimeout(() => {
         navigate('/dashboard')
-      }, 1000)
+      }, 900)
     } catch (error) {
       setMessage({
         type: 'error',
@@ -52,42 +65,50 @@ function Login() {
   }
 
   return (
-    <main className="login-wrapper">
-      <section className="brand" aria-label="SentinelPay">
-        <div className="brand-mark">S</div>
-        <div className="brand-text">
-          <strong>SentinelPay</strong>
-          <span>Monitoreo antifraude interno</span>
-        </div>
-      </section>
-
-      <section className="login-card">
-        <div className="card-top">
-          <div className="secure-pill">
-            <span className="secure-dot"></span>
-            Monitoreo activo
+    <main className="login-page">
+      <motion.section
+        className="login-card"
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+      >
+        <div className="login-card-header">
+          <div className="brand-stack login-brand-stack" aria-label="SentinelPay">
+            <div className="brand-mark">S</div>
+            <div className="brand-copy">
+              <strong>SentinelPay</strong>
+              <span>Monitoreo antifraude interno</span>
+            </div>
           </div>
+
+          <div className="secure-pill compact">
+            <span className="secure-dot" />
+            Acceso seguro
+          </div>
+
           <h1>Iniciar sesión</h1>
           <p>
-            Acceso exclusivo para usuarios internos del sistema de monitoreo
-            antifraude.
+            Selecciona un rol demo y accede al sistema de monitoreo.
           </p>
         </div>
 
         <div className="card-body">
           <div className="role-selector" aria-label="Selector de rol demo">
-            {roleOptions.map((roleOption) => (
-              <button
-                className={`role-btn ${
-                  selectedRole.role === roleOption.role ? 'active' : ''
-                }`}
-                key={roleOption.role}
-                onClick={() => handleRoleSelect(roleOption)}
-                type="button"
-              >
-                {roleOption.label}
-              </button>
-            ))}
+            {roleOptions.map((roleOption) => {
+              const RoleIcon = roleOption.icon
+
+              return (
+                <button
+                  className={`role-btn ${selectedRole.role === roleOption.role ? 'active' : ''}`}
+                  key={roleOption.role}
+                  onClick={() => handleRoleSelect(roleOption)}
+                  type="button"
+                >
+                  <RoleIcon fontSize="small" />
+                  {roleOption.label}
+                </button>
+              )
+            })}
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -127,7 +148,7 @@ function Login() {
                   onClick={() => setShowPassword((current) => !current)}
                   type="button"
                 >
-                  {showPassword ? 'Ocultar' : 'Ver'}
+                  {showPassword ? <VisibilityOffOutlinedIcon fontSize="small" /> : <VisibilityOutlinedIcon fontSize="small" />}
                 </button>
               </div>
             </div>
@@ -141,28 +162,32 @@ function Login() {
                 />
                 Recordar dispositivo
               </label>
-              <a className="support-link" href="/login">
+              <button className="support-link" onClick={() => setMessage({ type: 'success', text: 'Contacto interno de soporte disponible en la intranet.' })} type="button">
                 Ayuda de acceso
-              </a>
+              </button>
             </div>
 
-            <button
-              className={`submit-btn ${isLoading ? 'loading' : ''}`}
-              disabled={isLoading}
-              type="submit"
-            >
+            <button className={`submit-btn ${isLoading ? 'loading' : ''}`} disabled={isLoading} type="submit">
               {isLoading ? 'Validando acceso...' : 'Entrar al dashboard'}
             </button>
 
-            {message && (
-              <div className={`message show ${message.type}`}>
-                {message.text}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {message ? (
+                <motion.div
+                  key={message.type + message.text}
+                  className={`message ${message.type}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  {message.text}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </form>
         </div>
-      </section>
-
+      </motion.section>
     </main>
   )
 }
