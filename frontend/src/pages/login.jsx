@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
+import { getRoleHomePath } from '../routes/routePaths'
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
@@ -53,7 +54,7 @@ function Login() {
         text: `Acceso concedido como ${selectedRole.role}. Sesión demo iniciada correctamente.`,
       })
       timerRef.current = window.setTimeout(() => {
-        navigate('/dashboard')
+        navigate(getRoleHomePath(selectedRole.role))
       }, 900)
     } catch (error) {
       setMessage({

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { AdminShell } from '../components/admin/AdminShell'
 import { LogoutOutlined, ShieldOutlined } from '@mui/icons-material'
+import { Navigate } from 'react-router-dom'
 
 function SimpleUserDashboard({ user, onLogout }) {
   return (
@@ -54,6 +55,10 @@ export function Dashboard() {
 
   if (user?.role === 'ADMIN') {
     return <AdminShell user={user} onLogout={handleLogout} />
+  }
+
+  if (user?.role === 'ANALISTA') {
+    return <Navigate to="/analista/dashboard" replace />
   }
 
   return <SimpleUserDashboard user={user} onLogout={handleLogout} />
