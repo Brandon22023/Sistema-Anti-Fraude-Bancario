@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { AdminShell } from '../components/admin/AdminShell'
 import { LogoutOutlined, ShieldOutlined } from '@mui/icons-material'
 import { Navigate } from 'react-router-dom'
 
@@ -54,7 +53,7 @@ export function Dashboard() {
   }
 
   if (user?.role === 'ADMIN') {
-    return <AdminShell user={user} onLogout={handleLogout} />
+    return <Navigate to="/admin/dashboard" replace />
   }
 
   if (user?.role === 'ANALISTA') {

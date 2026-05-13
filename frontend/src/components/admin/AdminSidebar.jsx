@@ -8,6 +8,7 @@ import {
   DashboardOutlined,
   SwapHorizOutlined,
 } from '@mui/icons-material'
+import { NavLink } from 'react-router-dom'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', Icon: DashboardOutlined },
@@ -20,7 +21,7 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Configuración', Icon: QueryStatsOutlined },
 ]
 
-export function AdminSidebar({ activeSection, onSelectSection, user }) {
+export function AdminSidebar({ activeSection, user }) {
   return (
     <aside className="admin-sidebar">
       <div className="admin-brand">
@@ -40,17 +41,16 @@ export function AdminSidebar({ activeSection, onSelectSection, user }) {
       <div className="admin-nav-title">Panel principal</div>
       <nav className="admin-nav">
         {NAV_ITEMS.map(({ id, label, Icon }) => (
-          <button
+          <NavLink
             key={id}
-            className={`admin-nav-item ${activeSection === id ? 'active' : ''}`}
-            onClick={() => onSelectSection(id)}
-            type="button"
+            className={({ isActive }) => `admin-nav-item ${isActive || activeSection === id ? 'active' : ''}`}
+            to={`/admin/${id}`}
           >
             <span className="admin-nav-icon">
               <Icon fontSize="small" />
             </span>
             {label}
-          </button>
+          </NavLink>
         ))}
       </nav>
     </aside>

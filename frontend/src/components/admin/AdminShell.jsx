@@ -1,15 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import { AdminSidebar } from './AdminSidebar'
 import { AdminTopbar } from './AdminTopbar'
-import { OverviewPanel } from './panels/OverviewPanel'
-import { UsersPanel } from './panels/UsersPanel'
-import { RulesPanel } from './panels/RulesPanel'
-import { AlertsPanel } from './panels/AlertsPanel'
-import { TransactionsPanel } from './panels/TransactionsPanel'
-import { CustomersPanel } from './panels/CustomersPanel'
-import { AuditPanel } from './panels/AuditPanel'
-import { SettingsPanel } from './panels/SettingsPanel'
 
 const SECTION_META = {
   dashboard: {
@@ -54,25 +48,21 @@ const SECTION_META = {
   },
 }
 
-const SECTION_COMPONENTS = {
-  dashboard: OverviewPanel,
-  users: UsersPanel,
-  rules: RulesPanel,
-  alerts: AlertsPanel,
-  transactions: TransactionsPanel,
-  customers: CustomersPanel,
-  audit: AuditPanel,
-  settings: SettingsPanel,
+function getSectionKey(pathname) {
+  const parts = pathname.split('/').filter(Boolean)
+  return parts[1] || 'dashboard'
 }
 
-export function AdminShell({ user, onLogout }) {
-  const [activeSection, setActiveSection] = useState('dashboard')
+export function AdminShell() {
+  const { user, logout } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [toast, setToast] = useState(null)
   const toastTimerRef = useRef(null)
   const toastIdRef = useRef(0)
 
-  const meta = SECTION_META[activeSection]
-  const ActivePanel = useMemo(() => SECTION_COMPONENTS[activeSection], [activeSection])
+  const activeSection = getSectionKey(location.pathname)
+  const meta = SECTION_META[activeSection] ?? SECTION_META.dashboard
 
   const notify = (title, text) => {
     toastIdRef.current += 1
@@ -81,16 +71,21 @@ export function AdminShell({ user, onLogout }) {
     toastTimerRef.current = window.setTimeout(() => setToast(null), 2800)
   }
 
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <div className="admin-shell">
-      <AdminSidebar activeSection={activeSection} onSelectSection={setActiveSection} user={user} />
+      <AdminSidebar activeSection={activeSection} user={user} />
 
       <main className="admin-main">
         <AdminTopbar
           description={meta.description}
           label={meta.label}
           onGenerateReport={() => notify('Reporte generado', 'Se preparó un resumen administrativo demo.')}
-          onLogout={onLogout}
+          onLogout={handleLogout}
           onSimulate={() => notify('Simulación iniciada', 'Se generaron nuevas transacciones simuladas.')}
           title={meta.title}
         />
@@ -104,7 +99,7 @@ export function AdminShell({ user, onLogout }) {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <ActivePanel onNotify={notify} user={user} />
+            <Outlet context={{ onNotify: notify, user }} />
           </motion.section>
         </AnimatePresence>
       </main>

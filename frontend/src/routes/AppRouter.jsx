@@ -25,8 +25,23 @@ import { VisorTransactionsPanel } from '../components/visor/panels/TransactionsP
 import { VisorCustomersPanel } from '../components/visor/panels/CustomersPanel'
 import { VisorReportsPanel } from '../components/visor/panels/ReportsPanel'
 import { VisorAccessPanel } from '../components/visor/panels/AccessPanel'
+import { AdminShell } from '../components/admin/AdminShell'
+import { OverviewPanel } from '../components/admin/panels/OverviewPanel'
+import { UsersPanel } from '../components/admin/panels/UsersPanel'
+import { RulesPanel } from '../components/admin/panels/RulesPanel'
+import { AlertsPanel } from '../components/admin/panels/AlertsPanel'
+import { TransactionsPanel } from '../components/admin/panels/TransactionsPanel'
+import { CustomersPanel } from '../components/admin/panels/CustomersPanel'
+import { AuditPanel } from '../components/admin/panels/AuditPanel'
+import { SettingsPanel } from '../components/admin/panels/SettingsPanel'
 import { ProtectedRoute } from './ProtectedRoute'
 import { getRoleHomePath } from './routePaths'
+import { useOutletContext } from 'react-router-dom'
+
+function AdminPanelRoute({ Panel }) {
+  const { onNotify, user } = useOutletContext()
+  return <Panel onNotify={onNotify} user={user} />
+}
 
 function RoleHomeRedirect() {
   const { isAuthenticated, userRole } = useAuth()
@@ -54,6 +69,25 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requiredRoles={['ADMIN']}>
+            <AdminShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminPanelRoute Panel={OverviewPanel} />} />
+        <Route path="users" element={<AdminPanelRoute Panel={UsersPanel} />} />
+        <Route path="rules" element={<AdminPanelRoute Panel={RulesPanel} />} />
+        <Route path="alerts" element={<AdminPanelRoute Panel={AlertsPanel} />} />
+        <Route path="transactions" element={<AdminPanelRoute Panel={TransactionsPanel} />} />
+        <Route path="customers" element={<AdminPanelRoute Panel={CustomersPanel} />} />
+        <Route path="audit" element={<AdminPanelRoute Panel={AuditPanel} />} />
+        <Route path="settings" element={<AdminPanelRoute Panel={SettingsPanel} />} />
+      </Route>
 
       <Route
         path="/analista"
