@@ -65,5 +65,9 @@ export function Dashboard() {
     return <Navigate to="/supervisdor/dashoboard" replace />
   }
 
+  if (user?.role === 'VISOR') {
+    return <Navigate to="/visor/dashoboard" replace />
+  }
+
   return <SimpleUserDashboard user={user} onLogout={handleLogout} />
 }

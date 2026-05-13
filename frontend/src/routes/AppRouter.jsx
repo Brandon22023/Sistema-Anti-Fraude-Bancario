@@ -19,6 +19,12 @@ import { SupervisorAnalystsPanel } from '../components/supervisor/panels/Analyst
 import { SupervisorTransactionsPanel } from '../components/supervisor/panels/TransactionsPanel'
 import { SupervisorReportsPanel } from '../components/supervisor/panels/ReportsPanel'
 import { SupervisorAuditPanel } from '../components/supervisor/panels/AuditPanel'
+import { VisorShell } from '../components/visor/VisorShell'
+import { VisorDashboardPanel } from '../components/visor/panels/DashboardPanel'
+import { VisorTransactionsPanel } from '../components/visor/panels/TransactionsPanel'
+import { VisorCustomersPanel } from '../components/visor/panels/CustomersPanel'
+import { VisorReportsPanel } from '../components/visor/panels/ReportsPanel'
+import { VisorAccessPanel } from '../components/visor/panels/AccessPanel'
 import { ProtectedRoute } from './ProtectedRoute'
 import { getRoleHomePath } from './routePaths'
 
@@ -85,6 +91,23 @@ export function AppRouter() {
         <Route path="transactions" element={<SupervisorTransactionsPanel />} />
         <Route path="reports" element={<SupervisorReportsPanel />} />
         <Route path="audit" element={<SupervisorAuditPanel />} />
+      </Route>
+
+      <Route
+        path="/visor"
+        element={
+          <ProtectedRoute requiredRoles={['VISOR']}>
+            <VisorShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashoboard" replace />} />
+        <Route path="dashoboard" element={<VisorDashboardPanel />} />
+        <Route path="dashboard" element={<Navigate to="/visor/dashoboard" replace />} />
+        <Route path="transactions" element={<VisorTransactionsPanel />} />
+        <Route path="customers" element={<VisorCustomersPanel />} />
+        <Route path="reports" element={<VisorReportsPanel />} />
+        <Route path="access" element={<VisorAccessPanel />} />
       </Route>
 
       {/* Rutas por rol - Ejemplo: solo ADMIN */}

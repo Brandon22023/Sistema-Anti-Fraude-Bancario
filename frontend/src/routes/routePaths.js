@@ -4,6 +4,8 @@ export function getRoleHomePath(role) {
       return '/analista/dashboard'
     case 'SUPERVISOR':
       return '/supervisdor/dashoboard'
+    case 'VISOR':
+      return '/visor/dashoboard'
     case 'ADMIN':
       return '/dashboard'
     default:
