@@ -1,74 +1,85 @@
 import { useContext, useCallback, useState } from 'react'
 import { AuthContext } from '../context/AuthContext'
 
-const DEMO_USERS = [
-  { email: 'admin@sentinelpay.com', password: 'admin123', role: 'ADMIN' },
-  { email: 'analyst@sentinelpay.com', password: 'admin123', role: 'ANALISTA' },
-  { email: 'supervisor@sentinelpay.com', password: 'admin123', role: 'SUPERVISOR' },
-  { email: 'viewer@sentinelpay.com', password: 'admin123', role: 'VISOR' },
-]
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_ANTI_FRAUDE_API_URL ||
+  'http://localhost:5240'
+).replace(/\/$/, '')
+
+function readStoredSession() {
+  const storedSession = localStorage.getItem('sentinelpay_session') || sessionStorage.getItem('sentinelpay_session')
+
+  if (!storedSession) {
+    return null
+  }
+
+  try {
+    return JSON.parse(storedSession)
+  } catch (error) {
+    console.error('Error al cargar sesión:', error)
+    localStorage.removeItem('sentinelpay_session')
+    sessionStorage.removeItem('sentinelpay_session')
+    return null
+  }
+}
 
 export function useAuthProvider() {
-  const [user, setUser] = useState(() => {
-    const storedSession = localStorage.getItem('sentinelpay_session')
-
-    if (!storedSession) {
-      return null
-    }
-
-    try {
-      return JSON.parse(storedSession)
-    } catch (error) {
-      console.error('Error al cargar sesión:', error)
-      localStorage.removeItem('sentinelpay_session')
-      return null
-    }
-  })
-  const [loading] = useState(false)
-
-  const createDemoJwt = useCallback((userObj) => {
-    return btoa(
-      JSON.stringify({
-        sub: userObj.email,
-        role: userObj.role,
-        iat: Date.now(),
-        iss: 'sentinelpay-demo-frontend',
-      }),
-    )
-  }, [])
+  const [user, setUser] = useState(() => readStoredSession())
+  const [loading, setLoading] = useState(false)
 
   const login = useCallback(
-    (email, password, rememberDevice = true) => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const normalizedEmail = email.trim().toLowerCase()
-          const foundUser = DEMO_USERS.find(
-            (item) => item.email === normalizedEmail && item.password === password.trim(),
-          )
+    async (email, password, rememberDevice = true) => {
+      setLoading(true)
 
-          if (!foundUser) {
-            reject(new Error('Acceso denegado. Verifica las credenciales ingresadas.'))
-            return
-          }
-
-          const session = {
-            email: foundUser.email,
-            role: foundUser.role,
-            token: createDemoJwt(foundUser),
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
             rememberDevice,
-          }
+          }),
+        })
 
-          localStorage.setItem('sentinelpay_session', JSON.stringify(session))
-          setUser(session)
-          resolve(session)
-        }, 750)
-      })
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(data?.detail || data?.message || 'Acceso denegado. Verifica las credenciales ingresadas.')
+        }
+
+        const session = {
+          userId: data.userId,
+          fullName: data.fullName,
+          email: data.email,
+          role: data.role,
+          token: data.token,
+          tokenType: data.tokenType,
+          expiresAt: data.expiresAt,
+          rememberDevice,
+        }
+
+        const storage = rememberDevice ? localStorage : sessionStorage
+        const otherStorage = rememberDevice ? sessionStorage : localStorage
+
+        storage.setItem('sentinelpay_session', JSON.stringify(session))
+        otherStorage.removeItem('sentinelpay_session')
+        setUser(session)
+
+        return session
+      } finally {
+        setLoading(false)
+      }
     },
-    [createDemoJwt],
+    [],
   )
 
   const logout = useCallback(() => {
     localStorage.removeItem('sentinelpay_session')
+    sessionStorage.removeItem('sentinelpay_session')
     setUser(null)
   }, [])
 

@@ -14,7 +14,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:5240
     command: >
-      sh -c "dotnet restore Backend.csproj && dotnet watch run --project Backend.csproj --no-launch-profile --urls http://0.0.0.0:5240"
+      sh -c "dotnet restore Backend.csproj && dotnet run --project Backend.csproj --no-launch-profile --urls http://0.0.0.0:5240"
     restart: unless-stopped
 
   frontend:

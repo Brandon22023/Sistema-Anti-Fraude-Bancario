@@ -231,9 +231,10 @@ GO
 
 INSERT INTO Users (RoleId, FullName, Email, PasswordHash)
 VALUES
-(1, 'Administrador SentinelPay', 'admin@sentinelpay.local', 'HASH_TEMPORAL_CAMBIAR'),
-(2, 'Analista de Riesgo', 'analyst@sentinelpay.local', 'HASH_TEMPORAL_CAMBIAR'),
-(3, 'Usuario Consulta', 'viewer@sentinelpay.local', 'HASH_TEMPORAL_CAMBIAR');
+(1, 'Administrador SentinelPay', 'admin@sentinelpay.com', 'PBKDF2$100000$JuPdUuo9hjv0KjV2nu0LKg==$VbtGZLMrpy5i3wBCK1wTkZGnAfqVgTnK9IVLjN9EMdg='),
+(2, 'Analista de Riesgo', 'analyst@sentinelpay.com', 'PBKDF2$100000$oOsuX2Dxpb+mrIzo/yJpaw==$REK4296jBkgvsJzDZxazcYM3xIBqtI2UEo2KIVu8LQw='),
+(3, 'Supervisor', 'supervisor@sentinelpay.com', 'PBKDF2$100000$MCcQOVrGHKVCbkwbLuqDyw==$9RPtZDkPmhkddVkqVFd7vNWcjJx/cGUsMlwkuzKOc28='),
+(4, 'Usuario Consulta', 'viewer@sentinelpay.com', 'PBKDF2$100000$asi1cJve8jHhW+fuQR1GjQ==$F6u6L7AVerQsgFyx3Ek9TjCCVthfoQc+8APiHcX4W/4=');
 GO
 
 INSERT INTO Customers (FullName, Email, Phone, Country, RiskLevel)
